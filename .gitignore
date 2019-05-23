@@ -14,3 +14,7 @@ Win32/
 kikoplay.aps
 release/
 debug/
+Gemfile.lock
+_site/
+_posts/
+category/
