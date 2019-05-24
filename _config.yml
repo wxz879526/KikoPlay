@@ -1,13 +1,13 @@
 title: KikoPlay
 description: KikoPlay - 全功能弹幕播放器
 author: Kikyou
-logo: /static/img/kikoplay-w.png
+logo: /KikoPlay/static/img/kikoplay-w.png
 github: https://github.com/Protostars/KikoPlay/
 about: 全功能弹幕播放器
 version: 最新版本：0.5.1
 
-baseurl: "https://protostars.github.io/KikoPlay"
-url: "https://protostars.github.io/KikoPlay"
+#baseurl: "https://protostars.github.io/KikoPlay"
+#url: "https://protostars.github.io/KikoPlay"
 
 allowsearch: false
 
