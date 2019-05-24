@@ -1,7 +1,5 @@
 ---
 layout: project
-title: Projects
-permalink: /projects/
+title: 截图
+permalink: /screenshots/
 ---
-
-Few of my projects.

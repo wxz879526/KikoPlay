@@ -8,7 +8,7 @@
 .logo-img {
     width: 56px;
     height: 56px;
-    border-radius: 60px;
+    border-radius: 0px;
     margin: 0 auto;
 }
 .logo-turner {
@@ -47,7 +47,7 @@ p.info a {
     height: auto;
 }
 .social-icons {
-    margin: 20px 0 0;
+    margin: 8px 0 0;
 }
 .icon {
     background: rgba(255, 255, 255, 0.63);

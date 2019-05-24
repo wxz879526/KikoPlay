@@ -1,17 +1,17 @@
 title: KikoPlay
-description: KikoPlay's Blog
+description: KikoPlay - 全功能弹幕播放器
 author: Kikyou
-logo: /static/img/avatar.png
+logo: /static/img/kikoplay-w.png
 github: https://github.com/Protostars/KikoPlay/
-about: KikoPlay
+about: 全功能弹幕播放器
+version: 最新版本：0.5.1
 
 #baseurl: "https://codeasashu.github.io/hcz-jekyll-blog"
 #url: "https://codeasashu.github.io/hcz-jekyll-blog"
 
-allowsearch: true
+allowsearch: false
 
-disqus_shortname: aboutashu
-google_analytics: UA-72862926-1
+disqus_shortname: KikoPlay
 
 share:
   twitter_username: \#

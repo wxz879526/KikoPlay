@@ -1,11 +1,16 @@
 ---
 layout: page
-title: About
+title: 关于
 permalink: /about/
 ---
+## KikoPlay - A Full-Featured Danmu Player
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](http://jekyllrb.com/)
+这里会记录关于KikoPlay的内容，包括：
 
-You can find the source code for this Jekyll theme at: [github.com/ashutosh2k12/hcz-jekyll-blog](https://github.com/ashutosh2k12/hcz-jekyll-blog)
+ - 新版本内容
+ - 我看过的一些动画的弹幕存档
+ - ......
 
-You can find the source code for Jekyll at [github.com/jekyll/jekyll](https://github.com/jekyll/jekyll)
+欢迎安利KikoPlay给你的小伙伴！
+
+遇到问题？[Github](https://github.com/Protostars/KikoPlay/)上提issue或者在QQ群(874761809)里反馈
