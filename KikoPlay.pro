@@ -244,3 +244,19 @@ contains(QT_ARCH, i386){
     }
 }
 
+win32 {
+	dep_runtime_dir = $$PWD\lib\runtime\*.*
+	CONFIG(debug, debug|release) {
+		dst_dir = $$OUT_PWD\\debug\\
+	} else {
+		dst_dir = $$OUT_PWD\\release\\
+	}
+	
+	dep_runtime_dir ~= s,/,\\,g
+        dst_dir ~= s,/,\\,g
+
+        message($$dep_runtime_dir)
+        message($$dst_dir)
+	
+	system(xcopy $$dep_runtime_dir $$dst_dir /y /e)
+}
