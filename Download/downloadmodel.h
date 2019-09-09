@@ -58,11 +58,11 @@ private:
     bool containTask(const QString &taskId);
     QString processKikoPlayCode(const QString &code);
 signals:
-    void magnetDone(const QString &path, const QString &magnet);
+    void magnetDone(const QString &path, const QString &magnet, bool directlyDownload);
     void removeTask(const QString &gid);
     void taskFinish(DownloadTask *task);
 public slots: 
-    QString addUriTask(const QString &uri, const QString &dir);
+    QString addUriTask(const QString &uri, const QString &dir, bool directlyDownload=false);
     QString addTorrentTask(const QByteArray &torrentContent,const QString &infoHash,const QString &dir,
                            const QString &selIndexes, const QString &magnet);
     void removeItem(QModelIndexList &removeIndexes, bool deleteFile);

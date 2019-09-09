@@ -9,6 +9,9 @@
 #include "LANServer/lanserver.h"
 #include "Download/downloadmodel.h"
 #include "Play/Danmu/Manager/danmumanager.h"
+#include "Download/Script/scriptmanager.h"
+#include "Download/autodownloadmanager.h"
+#include "Common/kcache.h"
 
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -28,6 +31,9 @@ AnimeLibrary *GlobalObjects::library=nullptr;
 DownloadModel *GlobalObjects::downloadModel=nullptr;
 DanmuManager *GlobalObjects::danmuManager=nullptr;
 LANServer *GlobalObjects::lanServer=nullptr;
+ScriptManager *GlobalObjects::scriptManager=nullptr;
+AutoDownloadManager *GlobalObjects::autoDownloadManager=nullptr;
+KCache *GlobalObjects::kCache=nullptr;
 QFont GlobalObjects::iconfont;
 QString GlobalObjects::dataPath;
 namespace  {
@@ -45,6 +51,9 @@ void GlobalObjects::init()
 
     initDatabase(mt_db_names);
     appSetting=new QSettings(dataPath+"settings.ini",QSettings::IniFormat);
+    workThread=new QThread();
+    workThread->setObjectName(QStringLiteral("workThread"));
+    workThread->start(QThread::NormalPriority);
     mpvplayer=new MPVPlayer();
     danmuPool=new DanmuPool();
     danmuRender=new DanmuRender();
@@ -53,9 +62,6 @@ void GlobalObjects::init()
     playlist=new PlayList();
     QObject::connect(playlist, &PlayList::currentMatchChanged, danmuPool, &DanmuPool::setPoolID);
     blocker=new Blocker();
-    workThread=new QThread();
-    workThread->setObjectName(QStringLiteral("workThread"));
-    workThread->start(QThread::NormalPriority);
     QObject *workObj=new QObject();
     workObj->moveToThread(workThread);
     QMetaObject::invokeMethod(workObj,[workObj](){
@@ -67,6 +73,9 @@ void GlobalObjects::init()
     downloadModel=new DownloadModel();
     danmuManager=new DanmuManager();
     lanServer=new LANServer();
+    scriptManager=new ScriptManager();
+    autoDownloadManager=new AutoDownloadManager();
+    kCache=new KCache(128);
 
     int fontId = QFontDatabase::addApplicationFont(":/res/iconfont.ttf");
     QStringList fontFamilies = QFontDatabase::applicationFontFamilies(fontId);
@@ -89,6 +98,9 @@ void GlobalObjects::clear()
     downloadModel->deleteLater();
     danmuManager->deleteLater();
     lanServer->deleteLater();
+    scriptManager->deleteLater();
+    autoDownloadManager->deleteLater();
+    delete kCache;
 }
 
 QSqlDatabase GlobalObjects::getDB(int db)

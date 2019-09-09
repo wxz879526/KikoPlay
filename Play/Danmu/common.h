@@ -109,6 +109,10 @@ struct MatchInfo
     };
     QList<DetailInfo> matches;
 };
+QDataStream &operator<<(QDataStream &stream, const MatchInfo &match);
+QDataStream &operator>>(QDataStream &stream, MatchInfo &match);
+QDataStream &operator<<(QDataStream &stream, const MatchInfo::DetailInfo &md);
+QDataStream &operator>>(QDataStream &stream, MatchInfo::DetailInfo &md);
 struct DanmuSourceInfo
 {
     int id;
@@ -150,4 +154,10 @@ struct BlockRule
     bool blockTest(DanmuComment *comment);
 };
 typedef QLinkedList<QPair<QSharedPointer<DanmuComment>,DanmuDrawInfo *> > PrepareList;
+struct DanmuEvent
+{
+    int start;
+    int duration;
+    QString description;
+};
 #endif // DANMUCOMMENT_H

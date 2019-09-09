@@ -13,6 +13,7 @@
 #include <QGraphicsOpacityEffect>
 #include <QButtonGroup>
 
+#include "widgets/clickslider.h"
 #include "capture.h"
 #include "mediainfo.h"
 #include "mpvparametersetting.h"
@@ -179,7 +180,7 @@ protected:
     {
         static QColor bgColor(0,0,0,150),barColor(51,168,255,200),penColor(255,255,255);
         static QRect bRect;
-        bRect=event->rect();
+        bRect=rect();
         QPainter painter(this);
         painter.fillRect(bRect,bgColor);
         if(duration==0)return;
@@ -205,7 +206,7 @@ protected:
 };
 }
 PlayerWindow::PlayerWindow(QWidget *parent) : QMainWindow(parent),autoHideControlPanel(true),
-    onTopWhilePlaying(false),updatingTrack(false),isFullscreen(false),resizePercent(-1)
+    onTopWhilePlaying(false),updatingTrack(false),isFullscreen(false),resizePercent(-1),jumpForwardTime(5),jumpBackwardTime(5)
 {
     setWindowFlags(Qt::FramelessWindowHint);
     GlobalObjects::mpvplayer->setParent(this);
@@ -749,6 +750,12 @@ void PlayerWindow::setupDanmuSettingPage()
     });
     fontFamilyCombo->setCurrentFont(QFont(GlobalObjects::appSetting->value("Play/DanmuFont","Microsoft Yahei").toString()));
 
+    enableAnalyze=new QCheckBox(tr("Enable Danmu Event Analyze"),danmuSettingPage);
+    enableAnalyze->setChecked(true);
+    QObject::connect(enableAnalyze,&QCheckBox::stateChanged,[](int state){
+        GlobalObjects::danmuPool->setAnalyzeEnable(state==Qt::Checked?true:false);
+    });
+    enableAnalyze->setChecked(GlobalObjects::appSetting->value("Play/EnableAnalyze",true).toBool());
 
     enableMerge=new QCheckBox(tr("Enable Danmu Merge"),danmuSettingPage);
     enableMerge->setChecked(true);
@@ -821,19 +828,19 @@ void PlayerWindow::setupDanmuSettingPage()
     appearancePage->setMaximumHeight(28 * logicalDpiY()/96);
     appearancePage->setObjectName(QStringLiteral("DialogPageButton"));
 
-    QToolButton *mergePage=new QToolButton(danmuSettingPage);
-    mergePage->setText(tr("Merge"));
-    mergePage->setCheckable(true);
-    mergePage->setToolButtonStyle(Qt::ToolButtonTextOnly);
-    mergePage->setMaximumHeight(28 * logicalDpiY()/96);
-    mergePage->setObjectName(QStringLiteral("DialogPageButton"));
+    QToolButton *advancedPage=new QToolButton(danmuSettingPage);
+    advancedPage->setText(tr("Advanced"));
+    advancedPage->setCheckable(true);
+    advancedPage->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    advancedPage->setMaximumHeight(28 * logicalDpiY()/96);
+    advancedPage->setObjectName(QStringLiteral("DialogPageButton"));
 
 
     QStackedLayout *danmuSettingSLayout=new QStackedLayout();
     QButtonGroup *btnGroup=new QButtonGroup(this);
     btnGroup->addButton(generalPage,0);
     btnGroup->addButton(appearancePage,1);
-    btnGroup->addButton(mergePage,2);
+    btnGroup->addButton(advancedPage,2);
     QObject::connect(btnGroup,(void (QButtonGroup:: *)(int, bool))&QButtonGroup::buttonToggled,[danmuSettingSLayout](int id, bool checked){
         if(checked)
         {
@@ -844,7 +851,7 @@ void PlayerWindow::setupDanmuSettingPage()
     QHBoxLayout *pageButtonHLayout=new QHBoxLayout();
     pageButtonHLayout->addWidget(generalPage);
     pageButtonHLayout->addWidget(appearancePage);
-    pageButtonHLayout->addWidget(mergePage);
+    pageButtonHLayout->addWidget(advancedPage);
 
     QVBoxLayout *danmuSettingVLayout=new QVBoxLayout(danmuSettingPage);
     danmuSettingVLayout->addLayout(pageButtonHLayout);
@@ -887,22 +894,23 @@ void PlayerWindow::setupDanmuSettingPage()
     appearanceGLayout->addWidget(bold,2,1);
     appearanceGLayout->addWidget(randomSize,3,1);
 
-    QWidget *pageMerge=new QWidget(danmuSettingPage);
-    danmuSettingSLayout->addWidget(pageMerge);
-    QGridLayout *mergeGLayout=new QGridLayout(pageMerge);
+    QWidget *pageAdvanced=new QWidget(danmuSettingPage);
+    danmuSettingSLayout->addWidget(pageAdvanced);
+    QGridLayout *mergeGLayout=new QGridLayout(pageAdvanced);
     mergeGLayout->setContentsMargins(0,0,0,0);
     mergeGLayout->setColumnStretch(0,1);
     mergeGLayout->setColumnStretch(1,1);
-    mergeGLayout->addWidget(enableMerge,0,0);
-    mergeGLayout->addWidget(enlargeMerged,1,0);
-    mergeGLayout->addWidget(mergeIntervalLabel,2,0);
-    mergeGLayout->addWidget(mergeInterval,3,0);
-    mergeGLayout->addWidget(contentSimLabel,4,0);
-    mergeGLayout->addWidget(contentSimCount,5,0);
-    mergeGLayout->addWidget(minMergeCountLabel,0,1);
-    mergeGLayout->addWidget(minMergeCount,1,1);
-    mergeGLayout->addWidget(mergeCountTipLabel,2,1);
-    mergeGLayout->addWidget(mergeCountTipPos,3,1);
+    mergeGLayout->addWidget(enableAnalyze,0,0);
+    mergeGLayout->addWidget(enableMerge,1,0);
+    mergeGLayout->addWidget(enlargeMerged,2,0);
+    mergeGLayout->addWidget(mergeIntervalLabel,3,0);
+    mergeGLayout->addWidget(mergeInterval,4,0);
+    mergeGLayout->addWidget(contentSimLabel,0,1);
+    mergeGLayout->addWidget(contentSimCount,1,1);
+    mergeGLayout->addWidget(minMergeCountLabel,2,1);
+    mergeGLayout->addWidget(minMergeCount,3,1);
+    mergeGLayout->addWidget(mergeCountTipLabel,4,1);
+    mergeGLayout->addWidget(mergeCountTipPos,5,1);
 }
 
 void PlayerWindow::setupPlaySettingPage()
@@ -1021,6 +1029,30 @@ void PlayerWindow::setupPlaySettingPage()
     dbClickBehaviorCombo->setCurrentIndex(GlobalObjects::appSetting->value("Play/DBClickBehavior",0).toInt());
     dbClickBehaivior=dbClickBehaviorCombo->currentIndex();
 
+    QLabel *forwardTimeLabel=new QLabel(tr("Forward Jump Time(s)"),playSettingPage);
+    QSpinBox *forwardTimeSpin=new QSpinBox(playSettingPage);
+    forwardTimeSpin->setRange(1,20);
+    forwardTimeSpin->setAlignment(Qt::AlignCenter);
+    forwardTimeSpin->setObjectName(QStringLiteral("Delay"));
+    QObject::connect(forwardTimeSpin,&QSpinBox::editingFinished,this,[this,forwardTimeSpin](){
+        jumpForwardTime=forwardTimeSpin->value();
+        GlobalObjects::appSetting->setValue("Play/ForwardJump",jumpForwardTime);
+    });
+    forwardTimeSpin->setValue(GlobalObjects::appSetting->value("Play/ForwardJump",5).toInt());
+    jumpForwardTime=forwardTimeSpin->value();
+
+    QLabel *backwardTimeLabel=new QLabel(tr("Backward Jump Time(s)"),playSettingPage);
+    QSpinBox *backwardTimeSpin=new QSpinBox(playSettingPage);
+    backwardTimeSpin->setRange(1,20);
+    backwardTimeSpin->setAlignment(Qt::AlignCenter);
+    backwardTimeSpin->setObjectName(QStringLiteral("Delay"));
+    QObject::connect(backwardTimeSpin,&QSpinBox::editingFinished,this,[this,backwardTimeSpin](){
+        jumpBackwardTime=backwardTimeSpin->value();
+        GlobalObjects::appSetting->setValue("Play/BackwardJump",jumpBackwardTime);
+    });
+    backwardTimeSpin->setValue(GlobalObjects::appSetting->value("Play/BackwardJump",5).toInt());
+    jumpBackwardTime=backwardTimeSpin->value();
+
     QToolButton *playPage=new QToolButton(playSettingPage);
     playPage->setText(tr("Play"));
     playPage->setCheckable(true);
@@ -1084,11 +1116,15 @@ void PlayerWindow::setupPlaySettingPage()
     QGridLayout *appearanceGLayout=new QGridLayout(pageBehavior);
     appearanceGLayout->setContentsMargins(0,0,0,0);
     appearanceGLayout->setColumnStretch(1, 1);
-    appearanceGLayout->setRowStretch(2,1);
+    appearanceGLayout->setRowStretch(4,1);
     appearanceGLayout->addWidget(clickBehaivorLabel,0,0);
     appearanceGLayout->addWidget(clickBehaviorCombo,0,1);
     appearanceGLayout->addWidget(dbClickBehaivorLabel,1,0);
     appearanceGLayout->addWidget(dbClickBehaviorCombo,1,1);
+    appearanceGLayout->addWidget(forwardTimeLabel,2,0);
+    appearanceGLayout->addWidget(forwardTimeSpin,2,1);
+    appearanceGLayout->addWidget(backwardTimeLabel,3,0);
+    appearanceGLayout->addWidget(backwardTimeSpin,3,1);
 }
 
 void PlayerWindow::setupSignals()
@@ -1104,18 +1140,25 @@ void PlayerWindow::setupSignals()
         timeLabel->setText("00:00"+this->totalTimeStr);
         static_cast<DanmuStatisInfo *>(danmuStatisBar)->duration=ts;
         const PlayListItem *currentItem=GlobalObjects::playlist->getCurrentItem();
+        if(currentItem->playTime>15 && currentItem->playTime<ts-15)
+        {
+            GlobalObjects::mpvplayer->seek(currentItem->playTime*1000);
+            showMessage(tr("Jumped to the last play position"));
+        }
+        if(resizePercent!=-1) adjustPlayerSize(resizePercent);
+        qDebug()<<"Duration Changed";
+    });
+    QObject::connect(GlobalObjects::mpvplayer,&MPVPlayer::fileChanged,[this](){
+        const PlayListItem *currentItem=GlobalObjects::playlist->getCurrentItem();
+        Q_ASSERT(currentItem);
+        process->setEventMark(QList<DanmuEvent>());
         if(currentItem->animeTitle.isEmpty())
-        {
             titleLabel->setText(currentItem->title);
-        }
         else
-        {
-            titleLabel->setText(QString("%1-%2").arg(currentItem->animeTitle).arg(currentItem->title));
-        }
+            titleLabel->setText(QString("%1-%2").arg(currentItem->animeTitle,currentItem->title));
         if(!currentItem->poolID.isEmpty())
         {
-			GlobalObjects::danmuPool->setPoolID(currentItem->poolID);
-            //GlobalObjects::danmuPool->loadDanmuFromDB();
+            GlobalObjects::danmuPool->setPoolID(currentItem->poolID);
         }
         else
         {
@@ -1123,17 +1166,11 @@ void PlayerWindow::setupSignals()
             if (GlobalObjects::danmuPool->hasPool())
             {
                 GlobalObjects::danmuPool->setPoolID("");
-                //GlobalObjects::danmuPool->cleanUp();
             }
         }
-        if(resizePercent!=-1)
-            adjustPlayerSize(resizePercent);
-        if(currentItem->playTime>15 && currentItem->playTime<ts-15)
-        {
-            GlobalObjects::mpvplayer->seek(currentItem->playTime*1000);
-            showMessage(tr("Jumped to the last play position"));
-        }
+        qDebug()<<"File Changed,Current Item: "<<currentItem->title;
     });
+
     QObject::connect(GlobalObjects::playlist,&PlayList::currentMatchChanged,[this](){
         const PlayListItem *currentItem=GlobalObjects::playlist->getCurrentItem();
         if(currentItem->animeTitle.isEmpty())
@@ -1141,6 +1178,7 @@ void PlayerWindow::setupSignals()
         else
             titleLabel->setText(QString("%1-%2").arg(currentItem->animeTitle).arg(currentItem->title));
     });
+    QObject::connect(GlobalObjects::danmuPool, &DanmuPool::eventAnalyzeFinished,process,&ClickSlider::setEventMark);
     QObject::connect(GlobalObjects::playlist,&PlayList::recentItemsUpdated,[this](){
         static_cast<PlayerContent *>(playerContent)->refreshItems();
     });
@@ -1153,12 +1191,22 @@ void PlayerWindow::setupSignals()
         timeLabel->setText(QString("%1:%2%3").arg(cmin,2,10,QChar('0')).arg(cls,2,10,QChar('0')).arg(this->totalTimeStr));
     });
     QObject::connect(GlobalObjects::mpvplayer,&MPVPlayer::stateChanged,[this](MPVPlayer::PlayState state){
+        if(GlobalObjects::playlist->getCurrentItem()!=nullptr)
+        {
+#ifdef Q_OS_WIN
+            if(state==MPVPlayer::Play)
+                SetThreadExecutionState(ES_CONTINUOUS | ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED);
+            else
+                SetThreadExecutionState(ES_CONTINUOUS);
+#endif
+            if(onTopWhilePlaying)
+            {
+                emit setStayOnTop(state==MPVPlayer::Play);
+            }
+        }
         if(onTopWhilePlaying && GlobalObjects::playlist->getCurrentItem() != nullptr)
         {
-            if(state==MPVPlayer::Play)
-                emit setStayOnTop(true);
-            else
-                emit setStayOnTop(false);
+
         }
         switch(state)
         {
@@ -1248,14 +1296,19 @@ void PlayerWindow::setupSignals()
     QObject::connect(process,&ClickSlider::sliderReleased,[this](){
         this->processPressed=false;
     });
-    QObject::connect(process,&ClickSlider::mouseMove,[this](int x,int ,int pos){
+    QObject::connect(process,&ClickSlider::mouseMove,[this](int x,int ,int pos, const QString &desc){
         int cs=pos/1000;
         int cmin=cs/60;
         int cls=cs-cmin*60;
-        timeInfoTip->setText(QString("%1:%2").arg(cmin,2,10,QChar('0')).arg(cls,2,10,QChar('0')));
+        QString timeTip(QString("%1:%2").arg(cmin,2,10,QChar('0')).arg(cls,2,10,QChar('0')));
+        if(!desc.isEmpty())
+            timeTip+="\n"+desc;
+        timeInfoTip->setText(timeTip);
         timeInfoTip->adjustSize();
-        int ty=danmuStatisBar->isHidden()?height()-controlPanelHeight-timeInfoTip->height():height()-controlPanelHeight-timeInfoTip->height()-statisBarHeight;
-        timeInfoTip->move(x-timeInfoTip->width()/3,ty);
+        int ty=danmuStatisBar->isHidden()?height()-controlPanelHeight-timeInfoTip->height():height()-controlPanelHeight-timeInfoTip->height()-statisBarHeight-1;
+        int nx = x-timeInfoTip->width()/3;
+        if(nx+timeInfoTip->width()>width()) nx = width()-timeInfoTip->width();
+        timeInfoTip->move(nx<0?0:nx,ty);
         timeInfoTip->show();
         timeInfoTip->raise();
         //QToolTip::showText(QPoint(x,process->geometry().topLeft()-40),QString("%1:%2").arg(cmin,2,10,QChar('0')).arg(cls,2,10,QChar('0')),process,process->rect());
@@ -1608,7 +1661,7 @@ void PlayerWindow::keyPressEvent(QKeyEvent *event)
             showMessage(tr("Frame Step:Forward"));
         }
 		else
-			GlobalObjects::mpvplayer->seek(5, true);
+            GlobalObjects::mpvplayer->seek(jumpForwardTime, true);
 		break;
 	case Qt::Key_Left:
 		if (event->modifiers() == Qt::ControlModifier)
@@ -1617,7 +1670,7 @@ void PlayerWindow::keyPressEvent(QKeyEvent *event)
             showMessage(tr("Frame Step:Backward"));
         }
 		else
-			GlobalObjects::mpvplayer->seek(-5, true);
+            GlobalObjects::mpvplayer->seek(-jumpBackwardTime, true);
 		break;
     case Qt::Key_PageUp:
         actPrev->trigger();
@@ -1664,6 +1717,7 @@ void PlayerWindow::closeEvent(QCloseEvent *)
     GlobalObjects::appSetting->setValue("MaxCount",maxDanmuCount->value());
     GlobalObjects::appSetting->setValue("Dense",denseLevel->currentIndex());
     GlobalObjects::appSetting->setValue("EnableMerge",enableMerge->isChecked());
+	GlobalObjects::appSetting->setValue("EnableAnalyze", enableAnalyze->isChecked());
     GlobalObjects::appSetting->setValue("EnlargeMerged",enlargeMerged->isChecked());
     GlobalObjects::appSetting->setValue("MergeInterval",mergeInterval->value());
     GlobalObjects::appSetting->setValue("MaxDiffCount",contentSimCount->value());

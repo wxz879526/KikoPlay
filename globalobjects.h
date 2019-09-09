@@ -16,6 +16,9 @@ class AnimeLibrary;
 class DownloadModel;
 class DanmuManager;
 class LANServer;
+class ScriptManager;
+class AutoDownloadManager;
+class KCache;
 class GlobalObjects
 {
 public:
@@ -34,6 +37,9 @@ public:
     static DownloadModel *downloadModel;
     static DanmuManager *danmuManager;
     static LANServer *lanServer;    
+    static ScriptManager *scriptManager;
+    static AutoDownloadManager *autoDownloadManager;
+    static KCache *kCache;
     static QString dataPath;
 
     static const int Comment_DB=0;

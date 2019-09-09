@@ -6,10 +6,18 @@
 #include <QRadioButton>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QClipboard>
+#include <QApplication>
+#include <QAction>
 #include <QTreeWidget>
 #include <QButtonGroup>
 #include "globalobjects.h"
+#include "Common/kcache.h"
 #include "Play/Danmu/Manager/danmumanager.h"
+namespace
+{
+    QSet<QString> hitWords;
+}
 AddPool::AddPool(QWidget *parent, const QString &srcAnime, const QString &srcEp) : CFramelessDialog(tr("Add Danmu Pool"),parent,true)
 {
     QVBoxLayout *addPoolVLayout=new QVBoxLayout(this);
@@ -63,6 +71,18 @@ AddPool::AddPool(QWidget *parent, const QString &srcAnime, const QString &srcEp)
     renamePool=(!srcAnime.isEmpty() && !srcEp.isEmpty());
     if(renamePool) setTitle(tr("Rename Danmu Pool"));
 
+    if(!srcAnime.isEmpty())
+    {
+        MatchInfo *match=GlobalObjects::kCache->get<MatchInfo>(QString::number(searchLocation)+srcAnime);
+        if(match)
+        {
+            for(MatchInfo::DetailInfo &detailInfo:match->matches)
+            {
+                new QTreeWidgetItem(searchResult,QStringList()<<detailInfo.animeTitle<<detailInfo.title);
+            }
+            delete match;
+        }
+    }
     resize(GlobalObjects::appSetting->value("DialogSize/AddPool",QSize(400*logicalDpiX()/96,400*logicalDpiY()/96)).toSize());
 }
 
@@ -90,10 +110,36 @@ QWidget *AddPool::setupSearchPage()
     searchResult->setRootIsDecorated(false);
     searchResult->setFont(searchPage->font());
     searchResult->setHeaderLabels(QStringList()<<tr("Anime Title")<<tr("Subtitle"));
+    searchResult->setContextMenuPolicy(Qt::ActionsContextMenu);
+
+    QAction *copy=new QAction(tr("Copy"), this);
+    QObject::connect(copy, &QAction::triggered, this, [this](){
+        auto selectedItems=searchResult->selectedItems();
+        if(selectedItems.count()==0) return;
+        QTreeWidgetItem *selectedItem=selectedItems.first();
+        QClipboard *cb = QApplication::clipboard();
+        cb->setText(QString("%1 %2").arg(selectedItem->data(0,0).toString(), selectedItem->data(1,0).toString()));
+    });
+    searchResult->addAction(copy);
 
     QObject::connect(searchButton,&QPushButton::clicked,this,[this,searchButton](){
         QString keyword=keywordEdit->text().trimmed();
         if(keyword.isEmpty())return;
+        if(!hitWords.contains(keyword))
+        {
+            MatchInfo *match=GlobalObjects::kCache->get<MatchInfo>(QString::number(searchLocation)+keyword);
+            if(match)
+            {
+                searchResult->clear();
+                for(MatchInfo::DetailInfo &detailInfo:match->matches)
+                {
+                    new QTreeWidgetItem(searchResult,QStringList()<<detailInfo.animeTitle<<detailInfo.title);
+                }
+                delete match;
+                hitWords<<keyword;
+                return;
+            }
+        }
         keywordEdit->setEnabled(false);
         searchButton->setEnabled(false);
         searchButton->setText(tr("Searching"));
@@ -111,6 +157,8 @@ QWidget *AddPool::setupSearchPage()
                 {
                     new QTreeWidgetItem(searchResult,QStringList()<<detailInfo.animeTitle<<detailInfo.title);
                 }
+                GlobalObjects::kCache->put(QString::number(searchLocation)+keyword, *sInfo);
+                hitWords.remove(keyword);
             }
             delete sInfo;
         }

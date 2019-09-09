@@ -43,7 +43,7 @@ void DownloadModel::addTask(DownloadTask *task)
     },Qt::QueuedConnection);
 }
 
-QString DownloadModel::addUriTask(const QString &uri, const QString &dir)
+QString DownloadModel::addUriTask(const QString &uri, const QString &dir, bool directlyDownload)
 {
     QString taskID(QCryptographicHash::hash(uri.toUtf8(),QCryptographicHash::Sha1).toHex());
     if(containTask(taskID))
@@ -69,6 +69,7 @@ QString DownloadModel::addUriTask(const QString &uri, const QString &dir)
        newTask->taskID = taskID;
        newTask->dir=dir;
        newTask->title=nUri;
+       newTask->directlyDownload=directlyDownload;
        addTask(newTask);
     }
     catch(RPCError &error)
@@ -94,6 +95,7 @@ QString DownloadModel::addTorrentTask(const QByteArray &torrentContent, const QS
         DownloadTask *btTask=new DownloadTask();
         btTask->gid=gid;
         btTask->createTime=QDateTime::currentSecsSinceEpoch();
+        btTask->finishTime=0;
         btTask->taskID =infoHash;
         btTask->dir=dir;
         btTask->title=infoHash;
@@ -258,7 +260,7 @@ void DownloadModel::updateItemStatus(const QJsonObject &statusObj)
                 QFileInfo info(item->dir,statusObj.value("infoHash").toString()+".torrent");
                 gidMap.remove(gid);
                 emit removeTask(gid);
-                emit magnetDone(info.absoluteFilePath(),item->uri);
+                emit magnetDone(info.absoluteFilePath(),item->uri, item->directlyDownload);
                 removeItem(item,true);
             }
             else

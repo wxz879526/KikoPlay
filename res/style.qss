@@ -316,27 +316,27 @@ QHeaderView::section {
     border:2px solid #a2aab1;
     background-color:rgb(245,245,245);
 }
-QSpinBox#Delay{
+#Delay{
     border:none;
     border-color:rgb(200,200,200);
     background:transparent;
 }
-QSpinBox#Delay::up-button {
+#Delay::up-button {
     subcontrol-origin:border;
     subcontrol-position:right;
-    image: url(:/res/images/plus.png);
+    image: url(:/res/images/border.png);
     width: 20px; height: 20px;
 }
-QSpinBox#Delay::down-button {
+#Delay::down-button {
      subcontrol-origin:border;
      subcontrol-position:left;
-     image: url(:/res/images/minus.png);
+     image: url(:/res/images/border.png);
      width: 20px; height: 20px;
 }
-QSpinBox#Delay::up-button:pressed {
+#Delay::up-button:pressed {
     margin:2px;
 }
-QSpinBox#Delay::down-button:pressed {
+#Delay::down-button:pressed {
     margin:2px;
 }
 QPushButton#DialogButton{
@@ -408,14 +408,14 @@ QMenu::item:selected:enabled {
     background-color: #32a7fe;
     color:#ffffff;
 }
-QMenu::indicator:exclusive:checked {
+QMenu::indicator:checked {
   image: url(:/res/images/check-normal.png);
   width:24px;
   height:24px;
   margin:4px;
 }
 
-QMenu::indicator:exclusive:checked:selected {
+QMenu::indicator:checked:selected {
   image: url(:/res/images/check-hover.png);
   width:24px;
   height:24px;
@@ -484,6 +484,43 @@ QCheckBox::indicator:unchecked:hover {
 QCheckBox::indicator:checked {
     image: url(:/res/images/check-box-check.png);
 }
+QLineEdit,QSpinBox {
+    background-color:#fafafa;
+    border: 1px solid #dddddd;
+    padding: 2px 2px 2px 2px;
+}
+QLineEdit:hover,QSpinBox:hover {
+    background-color:#fdfdfd;
+    border: 1px solid #bcbcbc;
+}
+QLineEdit:focus,QSpinBox:focus {
+    background-color: #ffffff;
+    border: 1px solid #2BA9EC;
+}
+QSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right; /* position at the top right corner */
+
+    width: 16px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */
+    border-image: url(:/res/images/up-arrow.png) 1;
+    border-width: 1px;
+}
+
+QSpinBox::up-button:hover {
+    border-image: url(:/res/images/up-arrow-hover.png) 1;
+}
+QSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right; /* position at bottom right corner */
+
+    width: 16px;
+    border-image: url(:/res/images/down-arrow.png) 1;
+    border-width: 1px;
+    border-top-width: 0;
+}
+QSpinBox::down-button:hover {
+    border-image: url(:/res/images/down-arrow-hover.png) 1;
+}
 QComboBox {
     background-color:#fafafa;
     border: 1px solid #dddddd;
@@ -537,6 +574,20 @@ QPushButton:pressed{
     background-color:rgb(255,255,255);
 }
 #FlatButton:pressed{
+    border-color:rgb(150,150,150);
+    background-color:rgb(231,231,231);
+}
+#LinkFlatButton{
+    border:1px solid #ebebeb;
+    background-color:transparent;
+    color:#47a0e9;
+    padding:4px 4px 4px 4px;
+}
+#LinkFlatButton:hover{
+    border:1px solid #dddddd;
+    background-color:rgb(255,255,255);
+}
+#LinkFlatButton:pressed{
     border-color:rgb(150,150,150);
     background-color:rgb(231,231,231);
 }

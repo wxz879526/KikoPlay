@@ -18,7 +18,7 @@ DanmuAccessResult *YoukuProvider::search(const QString &keyword)
     searchResult->providerId=id();
     try
     {
-        QString str(Network::httpGet(baseUrl,QUrlQuery()));
+		QString str(Network::httpGet(baseUrl, QUrlQuery(), QStringList({ "Cookie","cna=0;" })));
         handleSearchReply(str,searchResult);
     }
     catch(Network::NetworkError &error)
@@ -210,7 +210,10 @@ void YoukuProvider::handleSearchReply(QString &reply, DanmuAccessResult *result)
                 QString strId(parser.currentNodeProperty("href"));
                 if(strId.contains("v.youku.com"))
                 {
-                    item.title=parser.currentNodeProperty("title");
+                    item.title= parser.readContentUntil("a",false);
+                    QRegExp lre("<.*>");
+                    lre.setMinimal(true);
+                    item.title.replace(lre, "");
                     if(strId.startsWith("//"))strId="http:"+strId;
                     item.strId=strId;
                     youkuItem=true;
