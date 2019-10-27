@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "globalobjects.h"
 #include <QFontDatabase>
 #include <QSplitter>
@@ -16,6 +16,7 @@
 #include "Play/Playlist/playlist.h"
 #include "Play/Danmu/danmupool.h"
 #include "Play/Danmu/Render/danmurender.h"
+
 MainWindow::MainWindow(QWidget *parent)
     : CFramelessWindow(parent),listWindowWidth(0)
 {
@@ -71,11 +72,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupUI()
 {
-
     QWidget *centralWidget = new QWidget(this);
     QVBoxLayout *verticalLayout = new QVBoxLayout(centralWidget);
     verticalLayout->setContentsMargins(0, 0, 0, 0);
     verticalLayout->setSpacing(0);
+
 //------title bar
     widgetTitlebar = new QWidget(centralWidget);
     widgetTitlebar->setObjectName(QStringLiteral("widgetTitlebar"));
@@ -178,7 +179,6 @@ void MainWindow::setupUI()
             contentStackLayout->setCurrentIndex(id);
         }
     });
-
 
     QVBoxLayout *pageVerticalLayout = new QVBoxLayout();
     pageVerticalLayout->setContentsMargins(0,0,0,0);

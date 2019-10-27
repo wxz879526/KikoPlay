@@ -1,4 +1,4 @@
-#include "UI/mainwindow.h"
+﻿#include "UI/mainwindow.h"
 #include <QApplication>
 #include <QMessageBox>
 #include <QLocalSocket>
@@ -8,27 +8,36 @@
 #include "Play/Video/mpvplayer.h"
 #include "Play/Danmu/danmupool.h"
 #include "Play/Danmu/Render/danmurender.h"
+#include <io.h>
+
 #ifdef Q_OS_WIN
 #include <Windows.h>
 #include <DbgHelp.h>
 #pragma comment (lib,"DbgHelp.lib")
+
 LONG AppCrashHandler(EXCEPTION_POINTERS *pException) 
-{			
-	HANDLE hDumpFile = CreateFile((LPCWSTR)(QCoreApplication::applicationDirPath() + QDateTime::currentDateTime().toString("\\yyyy-MM-dd-hh-mm-ss")+".dmp").utf16(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hDumpFile != INVALID_HANDLE_VALUE) 
-	{
-		MINIDUMP_EXCEPTION_INFORMATION dumpInfo;
-		dumpInfo.ExceptionPointers = pException;
-		dumpInfo.ThreadId = GetCurrentThreadId();
-		dumpInfo.ClientPointers = TRUE;
-		MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hDumpFile, MiniDumpNormal, &dumpInfo, NULL, NULL);
-	}
-	EXCEPTION_RECORD* record = pException->ExceptionRecord;
-	QString errCode(QString::number(record->ExceptionCode, 16)), errAdr(QString::number((uint)record->ExceptionAddress, 16)), errMod;
-	QMessageBox::critical(nullptr, "Error", QString("Error Code: %1 Error Address: %2").arg(errCode).arg(errAdr),QMessageBox::Ok);
-	return EXCEPTION_EXECUTE_HANDLER;
+{
+    QDir dumpFilePath(QCoreApplication::applicationDirPath());
+    QString strFilePath = dumpFilePath.absoluteFilePath(QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm-ss")+".dmp");
+    QFile dumpFile(strFilePath);
+    if (!dumpFile.open(QIODevice::ReadWrite))
+        return EXCEPTION_EXECUTE_HANDLER;
+
+    MINIDUMP_EXCEPTION_INFORMATION dumpInfo;
+    dumpInfo.ExceptionPointers = pException;
+    dumpInfo.ThreadId = GetCurrentThreadId();
+    dumpInfo.ClientPointers = TRUE;
+
+    MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), (HANDLE)_get_osfhandle(dumpFile.handle()), MiniDumpNormal, &dumpInfo, NULL, NULL);
+
+    EXCEPTION_RECORD* record = pException->ExceptionRecord;
+    QString errCode(QString::number(record->ExceptionCode, 16)), errAdr(QString::number((uint)record->ExceptionAddress, 16)), errMod;
+    QMessageBox::critical(nullptr, "Error", QString("Error Code: %1 Error Address: %2").arg(errCode).arg(errAdr),QMessageBox::Ok);
+
+    return EXCEPTION_EXECUTE_HANDLER;
 }
 #endif
+
 void decodeParam()
 {
     QStringList args=QCoreApplication::arguments();
@@ -46,6 +55,7 @@ void decodeParam()
             }
         }
     }
+
     if(fileList.count()>0)
     {
         GlobalObjects::playlist->addItems(fileList,QModelIndex());
@@ -56,6 +66,7 @@ void decodeParam()
         }
     }
 }
+
 bool isRunning()
 {
     QLocalSocket socket;
@@ -88,16 +99,21 @@ bool isRunning()
                 socket.waitForBytesWritten();
             }
         }
+
         return true;
     }
+
     return false;
 }
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
 #ifdef Q_OS_WIN
     SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)AppCrashHandler);
 #endif
+
     if(isRunning()) return 0;
     QString qss;
     QFile qssFile(":/res/style.qss");
@@ -118,7 +134,8 @@ int main(int argc, char *argv[])
     MainWindow w;
     decodeParam();
     QLocalServer *singleServer=new QLocalServer(&a);
-    QObject::connect(singleServer, &QLocalServer::newConnection, [singleServer,&w](){
+    QObject::connect(singleServer, &QLocalServer::newConnection, [singleServer,&w]()
+    {
         QLocalSocket *localSocket = singleServer->nextPendingConnection();
         localSocket->waitForReadyRead();
         QByteArray data(localSocket->readAll());
@@ -144,6 +161,7 @@ int main(int argc, char *argv[])
         w.setWindowState((w.windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
         w.show();
     });
+
     if(!singleServer->listen("KikoPlaySingleServer"))
     {
         if(singleServer->serverError() == QAbstractSocket::AddressInUseError)
