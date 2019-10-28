@@ -1,4 +1,4 @@
-#include "checkupdate.h"
+﻿#include "checkupdate.h"
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QFile>
@@ -30,7 +30,7 @@ CheckUpdate::CheckUpdate(QWidget *parent) : CFramelessDialog(tr("Check For Updat
             QStringList curVer(versionStr.split('.',QString::SkipEmptyParts)),newVer(nVersionStr.split('.',QString::SkipEmptyParts));
             int i=0;
             bool hasNewversion=false;
-            for(;i<3;++i)
+            for(; i < 3; ++i)
             {
                 int cv=curVer.at(i).toInt(),nv=newVer.at(i).toInt();
                 if(cv<nv)

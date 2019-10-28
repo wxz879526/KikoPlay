@@ -1,9 +1,10 @@
-#include "tip.h"
+﻿#include "tip.h"
 #include <QLabel>
 #include <QVBoxLayout>
+
 Tip::Tip(QWidget *parent) : CFramelessDialog (tr("Tip"),parent)
 {
-    QLabel *tipContent=new QLabel(this);
+    QLabel *tipContent = new QLabel(this);
     tipContent->setTextInteractionFlags(Qt::TextSelectableByMouse);
     tipContent->setWordWrap(true);
     tipContent->setOpenExternalLinks(true);

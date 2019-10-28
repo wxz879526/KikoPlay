@@ -1,4 +1,4 @@
-#ifndef DOWNLOADWINDOW_H
+﻿#ifndef DOWNLOADWINDOW_H
 #define DOWNLOADWINDOW_H
 
 #include <QWidget>
@@ -10,6 +10,7 @@ class QStackedLayout;
 class QButtonGroup;
 struct DownloadTask;
 class CTorrentFileModel;
+
 class DownloadWindow : public QWidget
 {
     Q_OBJECT
@@ -47,8 +48,10 @@ private:
     void initActions();
     void downloadSelectionChanged();
     void setDetailInfo(DownloadTask *task);
+
 signals:
     void playFile(const QString &path);
+
 protected:
     virtual void showEvent(QShowEvent *event);
     virtual void hideEvent(QHideEvent *event);

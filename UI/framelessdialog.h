@@ -1,4 +1,4 @@
-#ifndef CFRAMELESSDIALOG_H
+﻿#ifndef CFRAMELESSDIALOG_H
 #define CFRAMELESSDIALOG_H
 
 #include "qsystemdetection.h"
@@ -9,12 +9,13 @@
 #include <QTimer>
 class QLabel;
 class DialogTip;
+
 #ifdef Q_OS_WIN
 class CFramelessDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit CFramelessDialog(QString titleStr="", QWidget *parent = 0,
+    explicit CFramelessDialog(QString titleStr="", QWidget *parent = nullptr,
                               bool showAccept=false,bool showClose=true,bool autoPauseVideo=true);
 public:
     void setResizeable(bool resizeable=true);
@@ -26,7 +27,8 @@ protected:
     virtual void onAccept();
     virtual void onClose();
     void addIgnoreWidget(QWidget* widget);
-    bool nativeEvent(const QByteArray &eventType, void *message, long *result);
+    bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
+
 public:
     void setContentsMargins(const QMargins &margins);
     void setContentsMargins(int left, int top, int right, int bottom);
@@ -54,15 +56,17 @@ private:
 
     // QWidget interface
 protected:
-    virtual void showEvent(QShowEvent *event);
-    virtual void resizeEvent(QResizeEvent *event);
+    virtual void showEvent(QShowEvent *event) override;
+    virtual void resizeEvent(QResizeEvent *event) override;
     void showBusyState(bool busy);
     void setTitle(const QString &text);
     void showMessage(const QString &msg, int type=0);
+
     // QDialog interface
 public slots:
     virtual void reject();
 };
+
 #else
 class CFramelessDialog : public QDialog
 {

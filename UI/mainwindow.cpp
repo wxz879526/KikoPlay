@@ -95,7 +95,7 @@ void MainWindow::setupUI()
     buttonIcon->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     buttonIcon->setPopupMode(QToolButton::InstantPopup);
 
-    QAction *act_poolManager=new QAction(tr("Danmu Pool Manager"), this);
+    QAction *act_poolManager = new QAction(tr("Danmu Pool Manager"), this);
     QObject::connect(act_poolManager,&QAction::triggered,[this](){
         PoolManager poolManage(buttonIcon);
         poolManage.exec();
@@ -110,7 +110,7 @@ void MainWindow::setupUI()
     });
     buttonIcon->addAction(act_lanServer);
 
-    QAction *act_checkUpdate=new QAction(tr("Check For Updates"), this);
+    QAction *act_checkUpdate = new QAction(tr("Check For Updates"), this);
     QObject::connect(act_checkUpdate,&QAction::triggered,[this](){
         CheckUpdate checkUpdate(buttonIcon);
         checkUpdate.exec();
@@ -173,7 +173,7 @@ void MainWindow::setupUI()
     btnGroup->addButton(buttonPage_Play,0);
     btnGroup->addButton(buttonPage_Library,1);
     btnGroup->addButton(buttonPage_Downlaod,2);
-    QObject::connect(btnGroup,(void (QButtonGroup:: *)(int, bool))&QButtonGroup::buttonToggled,[this](int id, bool checked){
+    QObject::connect(btnGroup, QOverload<int,bool>::of(&QButtonGroup::buttonToggled), [this](int id, bool checked){
         if(checked)
         {
             contentStackLayout->setCurrentIndex(id);
@@ -191,7 +191,6 @@ void MainWindow::setupUI()
     pageHLayout->addWidget(buttonPage_Library);
     pageHLayout->addWidget(buttonPage_Downlaod);
     pageVerticalLayout->addLayout(pageHLayout);
-
 
     GlobalObjects::iconfont.setPointSize(10);
     int cbHeight=24*logicalDpiY()/96;
@@ -220,7 +219,7 @@ void MainWindow::setupUI()
        }
     });
 
-    closeButton=new QToolButton(widgetTitlebar);
+    closeButton = new QToolButton(widgetTitlebar);
     closeButton->setFont(GlobalObjects::iconfont);
     closeButton->setText(QChar(0xe60b));
     closeButton->setObjectName(QStringLiteral("closelButton"));
@@ -250,7 +249,7 @@ void MainWindow::setupUI()
 #endif
     verticalLayout->addWidget(widgetTitlebar);
 
-    contentStackLayout=new QStackedLayout();
+    contentStackLayout = new QStackedLayout();
     contentStackLayout->setContentsMargins(0,0,0,0);
     contentStackLayout->addWidget(setupPlayPage());
     contentStackLayout->addWidget(setupLibraryPage());
@@ -261,7 +260,6 @@ void MainWindow::setupUI()
     setCentralWidget(centralWidget);
     setTitleBar(widgetTitlebar);
 	setFocusPolicy(Qt::StrongFocus);
-
 }
 
 void MainWindow::switchToPlay(const QString &fileToPlay)
@@ -301,7 +299,7 @@ QWidget *MainWindow::setupPlayPage()
     playerWindowWidget->setParent(playSplitter);
     playerWindow->show();
 
-    listWindow=new ListWindow(playSplitter);
+    listWindow = new ListWindow(playSplitter);
     QObject::connect(playerWindow,&PlayerWindow::toggleListVisibility,[this](){
         if(listWindow->isHidden())
         {
@@ -323,6 +321,7 @@ QWidget *MainWindow::setupPlayPage()
         if(GlobalObjects::playlist->getCurrentItem()==nullptr)
             listShowState=!listWindow->isHidden();
     });
+
     QObject::connect(playerWindow,&PlayerWindow::showFullScreen,[this,playVerticalLayout](bool on){
         static bool isMax;
         if(on)
@@ -399,7 +398,7 @@ QWidget *MainWindow::setupPlayPage()
 
 QWidget *MainWindow::setupLibraryPage()
 {
-    library=new LibraryWindow(this);
+    library = new LibraryWindow(this);
     QObject::connect(library,&LibraryWindow::playFile,this,&MainWindow::switchToPlay);
     return library;
 }
@@ -421,6 +420,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
         GlobalObjects::appSetting->setValue("ListVisibility",!listWindow->isHidden());
         GlobalObjects::appSetting->endGroup();
     }
+
     int playTime=GlobalObjects::mpvplayer->getTime();
     GlobalObjects::playlist->setCurrentPlayTime(playTime);
     QWidget::closeEvent(event);

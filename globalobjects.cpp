@@ -1,4 +1,4 @@
-#include "globalobjects.h"
+﻿#include "globalobjects.h"
 #include "Play/Danmu/danmupool.h"
 #include "Play/Danmu/Render/danmurender.h"
 #include "Play/Playlist/playlist.h"
@@ -40,6 +40,7 @@ namespace  {
     const char *mt_db_names[]={"Comment_M", "Bangumi_M","Download_M"};
     const char *wt_db_names[]={"Comment_W", "Bangumi_W","Download_W"};
 }
+
 void GlobalObjects::init()
 {
     dataPath=QCoreApplication::applicationDirPath()+"/data/";

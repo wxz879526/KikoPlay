@@ -1,4 +1,4 @@
-#include "downloadwindow.h"
+﻿#include "downloadwindow.h"
 #include <QVBoxLayout>
 #include <QStackedLayout>
 #include <QGridLayout>
@@ -415,7 +415,7 @@ DownloadWindow::~DownloadWindow()
 
 QWidget *DownloadWindow::setupLeftPanel()
 {
-    QWidget *leftPanel=new QWidget(this);
+    QWidget *leftPanel = new QWidget(this);
     leftPanel->setObjectName(QStringLiteral("DownloadLeftPanel"));
     const int panelWidth=220*logicalDpiX()/96;
     leftPanel->setFixedWidth(panelWidth);
@@ -429,16 +429,16 @@ QWidget *DownloadWindow::setupLeftPanel()
     btnOptions.leftMargin=20*logicalDpiX()/96;
     btnOptions.iconTextSpace=4*logicalDpiX()/96;
 
-    btnOptions.iconChar=QChar(0xe653);
-    FontIconToolButton *downloadingTask=new FontIconToolButton(btnOptions,leftPanel);
+    btnOptions.iconChar = QChar(0xe653);
+    FontIconToolButton *downloadingTask = new FontIconToolButton(btnOptions,leftPanel);
     downloadingTask->setObjectName(QStringLiteral("TaskTypeToolButton"));
     downloadingTask->setFixedWidth(panelWidth);
     downloadingTask->setCheckable(true);
     downloadingTask->setChecked(true);
     downloadingTask->setText(tr("Downloading"));
 
-    btnOptions.iconChar=QChar(0xe69a);
-    FontIconToolButton *completedTask=new FontIconToolButton(btnOptions,leftPanel);
+    btnOptions.iconChar = QChar(0xe69a);
+    FontIconToolButton *completedTask = new FontIconToolButton(btnOptions,leftPanel);
     completedTask->setObjectName(QStringLiteral("TaskTypeToolButton"));
     completedTask->setFixedWidth(panelWidth);
     completedTask->setCheckable(true);
@@ -451,7 +451,7 @@ QWidget *DownloadWindow::setupLeftPanel()
     allTask->setCheckable(true);
     allTask->setText(tr("All"));
 
-    btnOptions.iconChar=QChar(0xe63a);
+    btnOptions.iconChar = QChar(0xe63a);
     FontIconToolButton *bgmList=new FontIconToolButton(btnOptions,leftPanel);
     bgmList->setObjectName(QStringLiteral("TaskTypeToolButton"));
     bgmList->setFixedWidth(panelWidth);
@@ -465,21 +465,21 @@ QWidget *DownloadWindow::setupLeftPanel()
     resSearch->setCheckable(true);
     resSearch->setText(tr("ResSearch"));
 
-    btnOptions.iconChar=QChar(0xe610);
+    btnOptions.iconChar = QChar(0xe610);
     FontIconToolButton *autoDownload=new FontIconToolButton(btnOptions,leftPanel);
     autoDownload->setObjectName(QStringLiteral("TaskTypeToolButton"));
     autoDownload->setFixedWidth(panelWidth);
     autoDownload->setCheckable(true);
     autoDownload->setText(tr("AutoDownload"));
 
-    taskTypeButtonGroup=new QButtonGroup(this);
+    taskTypeButtonGroup = new QButtonGroup(this);
     taskTypeButtonGroup->addButton(downloadingTask,1);
     taskTypeButtonGroup->addButton(completedTask,2);
     taskTypeButtonGroup->addButton(allTask,0);
     taskTypeButtonGroup->addButton(bgmList,3);
     taskTypeButtonGroup->addButton(resSearch,4);
     taskTypeButtonGroup->addButton(autoDownload,5);
-    QObject::connect(taskTypeButtonGroup,(void (QButtonGroup:: *)(int, bool))&QButtonGroup::buttonToggled,[this](int id, bool checked){
+    QObject::connect(taskTypeButtonGroup,  QOverload<int,bool>::of(&QButtonGroup::buttonToggled), [this](int id, bool checked){
         if(checked)
         {
             if(id<3)
@@ -512,7 +512,7 @@ QWidget *DownloadWindow::setupLeftPanel()
     upSpeedLabel=new QLabel(this);
     upSpeedLabel->setObjectName(QStringLiteral("UpSpeedLabel"));
 
-    QVBoxLayout *leftVLayout=new QVBoxLayout(leftPanel);
+    QVBoxLayout *leftVLayout = new QVBoxLayout(leftPanel);
     leftVLayout->setContentsMargins(0,0,0,0);
     leftVLayout->setSpacing(0);
     leftVLayout->addWidget(downloadingTask);
@@ -522,6 +522,7 @@ QWidget *DownloadWindow::setupLeftPanel()
     leftVLayout->addWidget(resSearch);
     leftVLayout->addWidget(autoDownload);
     leftVLayout->addStretch(1);
+
     QGridLayout *speedInfoGLayout=new QGridLayout();
     speedInfoGLayout->addWidget(downSpeedIconLabel,0,0);
     speedInfoGLayout->addWidget(downSpeedLabel,0,1);

@@ -1,4 +1,4 @@
-#ifndef LISTWINDOW_H
+﻿#ifndef LISTWINDOW_H
 #define LISTWINDOW_H
 
 #include <QTreeView>
@@ -32,6 +32,7 @@ private:
     QAction *m_caseSensitivityAction;
     QActionGroup *m_patternGroup;
 };
+
 class ListWindow : public QWidget
 {
     Q_OBJECT
@@ -73,6 +74,7 @@ protected:
     virtual void dropEvent(QDropEvent *event);
     virtual void enterEvent(QEvent *event);
     virtual void leaveEvent(QEvent *event);
+
 public slots:
     void sortSelection(bool allItem,bool ascending);
     void playItem(const QModelIndex &index,bool playChild=true);
@@ -80,7 +82,6 @@ public slots:
     void showMessage(const QString &msg, int flag);
     void updatePlaylistActions();
     void updateDanmuActions();
-
 };
 
 #endif // LISTWINDOW_H

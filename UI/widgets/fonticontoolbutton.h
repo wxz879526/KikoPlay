@@ -1,6 +1,8 @@
-#ifndef FONTICONTOOLBUTTON_H
+﻿#ifndef FONTICONTOOLBUTTON_H
 #define FONTICONTOOLBUTTON_H
+
 #include <QToolButton>
+
 class QLabel;
 struct FontIconToolButtonOptions
 {
@@ -12,12 +14,14 @@ struct FontIconToolButtonOptions
     int hoverColor;
     int iconTextSpace;
 };
+
 class FontIconToolButton : public QToolButton
 {
 public:
     explicit FontIconToolButton(const FontIconToolButtonOptions &options, QWidget *parent=nullptr);
     void setCheckable(bool checkable);
     void setText(const QString &text);
+
 protected:
     QLabel *iconLabel,*textLabel;
     QString normalStyleSheet,hoverStyleSheet;
