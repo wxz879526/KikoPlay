@@ -8,6 +8,7 @@
 #include <mpv/opengl_cb.h>
 #include <mpv/qthelper.hpp>
 #include "Play/Danmu/common.h"
+
 class DanmuRender;
 class MPVPlayer : public QOpenGLWidget
 {
@@ -23,6 +24,7 @@ public:
         Stop,
         EndReached
     };
+
     struct VideoSizeInfo
     {
         int width;
@@ -30,6 +32,7 @@ public:
         int dwidth;
         int dheight;
     };
+
     const QStringList videoFileFormats = {"*.mp4","*.mkv","*.avi","*.flv","*.wmv"};
     const QStringList subtitleFormats = {"*.sub","*.srt","*.ass","*.ssa","*.smi","*.rt","*.txt","*.mks","*.vtt","*.sup"};
     const QStringList speedLevel={"0.5","0.75","1","1.5","2"};
@@ -48,6 +51,7 @@ public:
     VideoSizeInfo getVideoSizeInfo();
     QMap<QString,QMap<QString,QString> > getMediaInfo();
     void drawTexture(QList<const DanmuObject *> &objList, float alpha);
+
 signals:
     void fileChanged();
     void durationChanged(int value);
@@ -57,6 +61,7 @@ signals:
     void trackInfoChange(int type);
     void initContext();
     void showLog(const QString &log);
+
 public slots:   
     void setMedia(QString file);
     void setState(PlayState newState);
@@ -76,10 +81,12 @@ public slots:
 protected:
     void initializeGL() override;
     void paintGL() override;
+
 private slots:
     void swapped();
     void on_mpv_events();
     void maybeUpdate();
+
 private:
     struct TrackInfo
     {

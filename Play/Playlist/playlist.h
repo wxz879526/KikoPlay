@@ -1,4 +1,4 @@
-#ifndef PLAYLIST_H
+﻿#ifndef PLAYLIST_H
 #define PLAYLIST_H
 
 #include <QAbstractItemModel>
@@ -39,6 +39,7 @@ public:
     LoopMode getLoopMode() const;
     bool canPaste() const;
     QList<QPair<QString,QString> > &recent();
+
 signals:
     void currentInvaild();
     void currentMatchChanged(const QString &pid);

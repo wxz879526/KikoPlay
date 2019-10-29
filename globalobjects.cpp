@@ -71,7 +71,7 @@ void GlobalObjects::init()
     },Qt::QueuedConnection);
     providerManager=new ProviderManager();
     library=new AnimeLibrary();
-    downloadModel=new DownloadModel();
+    downloadModel = new DownloadModel();
     danmuManager=new DanmuManager();
     lanServer=new LANServer();
     scriptManager=new ScriptManager();

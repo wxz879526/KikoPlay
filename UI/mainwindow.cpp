@@ -193,7 +193,7 @@ void MainWindow::setupUI()
     pageVerticalLayout->addLayout(pageHLayout);
 
     GlobalObjects::iconfont.setPointSize(10);
-    int cbHeight=24*logicalDpiY()/96;
+    int cbHeight = 24*logicalDpiY()/96;
     minButton=new QToolButton(widgetTitlebar);
     minButton->setFont(GlobalObjects::iconfont);
     minButton->setText(QChar(0xe651));
@@ -279,7 +279,7 @@ void MainWindow::switchToPlay(const QString &fileToPlay)
 
 QWidget *MainWindow::setupPlayPage()
 {
-    QWidget *page_play=new QWidget(centralWidget());
+    QWidget *page_play = new QWidget(centralWidget());
     page_play->setObjectName(QStringLiteral("widgetPagePlay"));
     page_play->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::MinimumExpanding);
 
@@ -290,7 +290,7 @@ QWidget *MainWindow::setupPlayPage()
     playSplitter->setHandleWidth(1);
     //QObject::connect(playSplitter,&QSplitter::splitterMoved,)
 
-    playerWindow=new PlayerWindow();
+    playerWindow = new PlayerWindow();
     playerWindow->setMouseTracking(true);
     QWindow *native_wnd  = QWindow::fromWinId(playerWindow->winId());
     QWidget *playerWindowWidget=QWidget::createWindowContainer(native_wnd);
@@ -405,7 +405,7 @@ QWidget *MainWindow::setupLibraryPage()
 
 QWidget *MainWindow::setupDownloadPage()
 {
-    download=new DownloadWindow(this);
+    download = new DownloadWindow(this);
     QObject::connect(download,&DownloadWindow::playFile,this,&MainWindow::switchToPlay);
     return download;
 }

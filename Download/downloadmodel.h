@@ -1,4 +1,4 @@
-#ifndef DOWNLOADMODEL_H
+﻿#ifndef DOWNLOADMODEL_H
 #define DOWNLOADMODEL_H
 #include <QAbstractItemModel>
 #include <QIcon>
@@ -19,6 +19,7 @@ public slots:
 signals:
     void loadDone(int count);
 };
+
 class DownloadModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -37,6 +38,7 @@ public:
     void setRPC(Aria2JsonRPC *aria2RPC);
     const QMap<QString, DownloadTask *> &getItems() const{return gidMap;}
     QList<DownloadTask *> &getAllTask() {return downloadTasks;}
+
 private:
     QList<DownloadTask *> downloadTasks;
     QMap<QString ,DownloadTask *> gidMap;
@@ -57,10 +59,12 @@ private:
     void removeItem(DownloadTask *task, bool deleteFile);
     bool containTask(const QString &taskId);
     QString processKikoPlayCode(const QString &code);
+
 signals:
     void magnetDone(const QString &path, const QString &magnet, bool directlyDownload);
     void removeTask(const QString &gid);
     void taskFinish(DownloadTask *task);
+
 public slots: 
     QString addUriTask(const QString &uri, const QString &dir, bool directlyDownload=false);
     QString addTorrentTask(const QByteArray &torrentContent,const QString &infoHash,const QString &dir,
@@ -74,6 +78,7 @@ public slots:
     void saveItemStatus();
     void saveItemStatus(const DownloadTask *task);
     QString findFileUri(const QString &fileName);
+
     // QAbstractItemModel interface
 public:
     inline virtual QModelIndex index(int row, int column, const QModelIndex &parent) const{return parent.isValid()?QModelIndex():createIndex(row,column);}
@@ -85,6 +90,7 @@ public:
     virtual void fetchMore(const QModelIndex &parent);
     inline virtual bool canFetchMore(const QModelIndex &) const {return hasMoreTasks;}
 };
+
 class TaskFilterProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT

@@ -1,11 +1,12 @@
-#include "adduritask.h"
+﻿#include "adduritask.h"
 #include <QPlainTextEdit>
 #include <QHBoxLayout>
 #include <QDir>
 #include "widgets/dirselectwidget.h"
+
 AddUriTask::AddUriTask(QWidget *parent, const QStringList &uris, const QString &path) : CFramelessDialog(tr("Add URI"),parent,true,true,false)
 {
-    uriEdit=new QPlainTextEdit(this);
+    uriEdit = new QPlainTextEdit(this);
     uriEdit->setObjectName(QStringLiteral("UriEdit"));
     uriEdit->setPlaceholderText(tr("One link per line, multiple links separated by line breaks"));
     uriEdit->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::MinimumExpanding);
@@ -14,8 +15,9 @@ AddUriTask::AddUriTask(QWidget *parent, const QStringList &uris, const QString &
         uriEdit->setPlainText(uris.join('\n'));
     }
 
-    dirSelect=new DirSelectWidget(this);
+    dirSelect = new DirSelectWidget(this);
     if(!path.isEmpty())dirSelect->setDir(path);
+
     QVBoxLayout *dialogVLayout=new QVBoxLayout(this);
     dialogVLayout->addWidget(uriEdit);
     dialogVLayout->addWidget(dirSelect);
@@ -29,6 +31,7 @@ void AddUriTask::onAccept()
         showMessage(tr("Dir is invaild"),1);
         return;
     }
+
     this->dir=dirSelect->getDir();
     QStringList uris=uriEdit->toPlainText().split('\n',QString::SkipEmptyParts);
     for(auto iter=uris.begin();iter!=uris.end();)

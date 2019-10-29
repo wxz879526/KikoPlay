@@ -1,5 +1,4 @@
-#include "mpvplayer.h"
-
+﻿#include "mpvplayer.h"
 #include <QOpenGLContext>
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLPaintDevice>
@@ -9,6 +8,7 @@
 #include <clocale>
 #include "Play/Danmu/Render/danmurender.h"
 #include "globalobjects.h"
+
 namespace
 {
 const char *vShaderDanmu =
@@ -60,6 +60,7 @@ const char *fShaderDanmu_Old =
         "    gl_FragColor.a *= alpha;\n"
 "}\n";
 }
+
 MPVPlayer::MPVPlayer(QWidget *parent) : QOpenGLWidget(parent),state(PlayState::Stop),
     mute(false),danmuHide(false),oldOpenGLVersion(false),currentDuration(0)
 {

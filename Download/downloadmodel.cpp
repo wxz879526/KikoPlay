@@ -1,4 +1,4 @@
-#include "downloadmodel.h"
+﻿#include "downloadmodel.h"
 #include "globalobjects.h"
 #include "aria2jsonrpc.h"
 #include <QSqlQuery>
@@ -48,9 +48,11 @@ QString DownloadModel::addUriTask(const QString &uri, const QString &dir, bool d
     QString taskID(QCryptographicHash::hash(uri.toUtf8(),QCryptographicHash::Sha1).toHex());
     if(containTask(taskID))
         return QString(tr("The task already exists: \n%1").arg(uri));
+
     QString nUri(uri);
     if(nUri.startsWith("kikoplay:anime="))
         nUri = processKikoPlayCode(uri.mid(15));
+
     QJsonObject options;
     options.insert("dir", dir);
     options.insert("bt-metadata-only","true");
@@ -60,16 +62,16 @@ QString DownloadModel::addUriTask(const QString &uri, const QString &dir, bool d
 
     try
     {
-       QString gid=rpc->addUri(nUri,options);
-       DownloadTask *newTask=new DownloadTask();
-       newTask->gid=gid;
-       newTask->uri=nUri;
-       newTask->createTime=QDateTime::currentSecsSinceEpoch();
-       newTask->finishTime=0;
+       QString gid = rpc->addUri(nUri,options);
+       DownloadTask *newTask = new DownloadTask();
+       newTask->gid = gid;
+       newTask->uri = nUri;
+       newTask->createTime = QDateTime::currentSecsSinceEpoch();
+       newTask->finishTime = 0;
        newTask->taskID = taskID;
-       newTask->dir=dir;
-       newTask->title=nUri;
-       newTask->directlyDownload=directlyDownload;
+       newTask->dir = dir;
+       newTask->title = nUri;
+       newTask->directlyDownload = directlyDownload;
        addTask(newTask);
     }
     catch(RPCError &error)

@@ -1,4 +1,4 @@
-#include "framelessdialog.h"
+﻿#include "framelessdialog.h"
 #include <QApplication>
 #include <QPoint>
 #include <QSize>
@@ -28,11 +28,10 @@ CFramelessDialog::CFramelessDialog(QString titleStr, QWidget *parent, bool showA
       inited(false),
 	  restorePlayState(false)
 {
-
     setWindowFlags((windowFlags() | Qt::Dialog | Qt::FramelessWindowHint) & ~Qt::WindowSystemMenuHint);
     setObjectName(QStringLiteral("framelessDialog"));
     GlobalObjects::iconfont.setPointSize(10);
-    titleBar=new QWidget(this);
+    titleBar = new QWidget(this);
 
     QSize btnSize(20*logicalDpiX()/96,20*logicalDpiY()/96);
 
@@ -73,7 +72,7 @@ CFramelessDialog::CFramelessDialog(QString titleStr, QWidget *parent, bool showA
     title->setOpenExternalLinks(true);
     addIgnoreWidget(title);
 
-    QHBoxLayout *titleHBLayout=new QHBoxLayout(titleBar);
+    QHBoxLayout *titleHBLayout = new QHBoxLayout(titleBar);
     //titleHBLayout->setContentsMargins(0,0,0,0);
     titleHBLayout->addWidget(title);
     titleHBLayout->addWidget(busyLabel);

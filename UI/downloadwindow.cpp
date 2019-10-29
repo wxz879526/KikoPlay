@@ -54,7 +54,7 @@ DownloadWindow::DownloadWindow(QWidget *parent) : QWidget(parent),currentTask(nu
         AddUriTask addUriTaskDialog(this);
         if(QDialog::Accepted==addUriTaskDialog.exec())
         {
-            for(QString &uri:addUriTaskDialog.uriList)
+            for(QString &uri : addUriTaskDialog.uriList)
             {
                 QString errInfo(GlobalObjects::downloadModel->addUriTask(uri,addUriTaskDialog.dir));
                 if(!errInfo.isEmpty())
@@ -159,7 +159,7 @@ DownloadWindow::DownloadWindow(QWidget *parent) : QWidget(parent),currentTask(nu
     downloadView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     downloadView->setAlternatingRowColors(true);
 
-    rpc=new Aria2JsonRPC(this);
+    rpc = new Aria2JsonRPC(this);
     GlobalObjects::downloadModel->setRPC(rpc);
     QTimer::singleShot(1000,[this](){
         QJsonObject globalOptions;
@@ -171,7 +171,7 @@ DownloadWindow::DownloadWindow(QWidget *parent) : QWidget(parent),currentTask(nu
 	//downloadView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     downloadView->setItemDelegate(new DownloadItemDelegate(this));
     downloadView->setContextMenuPolicy(Qt::ActionsContextMenu);
-    TaskFilterProxyModel *proxyModel=new TaskFilterProxyModel(this);
+    TaskFilterProxyModel *proxyModel = new TaskFilterProxyModel(this);
     proxyModel->setSourceModel(GlobalObjects::downloadModel);
     downloadView->setModel(proxyModel);
     downloadView->setSortingEnabled(true);
@@ -338,7 +338,7 @@ DownloadWindow::DownloadWindow(QWidget *parent) : QWidget(parent),currentTask(nu
     contentGLayout->setRowStretch(0,1);
     contentGLayout->setContentsMargins(0,0,10*logicalDpiX()/96,0);
 
-    refreshTimer=new QTimer();
+    refreshTimer = new QTimer();
     QObject::connect(refreshTimer,&QTimer::timeout,[this](){
         auto &items=GlobalObjects::downloadModel->getItems();
         for(auto iter=items.cbegin();iter!=items.cend();++iter)
@@ -347,6 +347,7 @@ DownloadWindow::DownloadWindow(QWidget *parent) : QWidget(parent),currentTask(nu
         }
         rpc->tellGlobalStatus();
     });
+
     QObject::connect(rpc,&Aria2JsonRPC::refreshStatus,[this](const QJsonObject &statusObj){
         QString gid(statusObj.value("gid").toString());
         if(currentTask && currentTask->gid==gid)
@@ -355,6 +356,7 @@ DownloadWindow::DownloadWindow(QWidget *parent) : QWidget(parent),currentTask(nu
         }
         GlobalObjects::downloadModel->updateItemStatus(statusObj);
     });
+
     QObject::connect(rpc,&Aria2JsonRPC::refreshGlobalStatus,[this](int downSpeed,int upSpeed,int numActive){
         downSpeedLabel->setText(formatSize(true,downSpeed));
         upSpeedLabel->setText(formatSize(true,upSpeed));

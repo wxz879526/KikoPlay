@@ -1,4 +1,4 @@
-#include "dirselectwidget.h"
+﻿#include "dirselectwidget.h"
 #include <QComboBox>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -8,10 +8,11 @@
 #include <QSettings>
 #include "Download/util.h"
 #include "globalobjects.h"
+
 DirSelectWidget::DirSelectWidget(QWidget *parent) : QWidget(parent), dirChanged(false)
 {
-    dirList=GlobalObjects::appSetting->value("Download/PathList",QStringList()).toStringList();
-    dirEdit=new QComboBox(this);
+    dirList = GlobalObjects::appSetting->value("Download/PathList",QStringList()).toStringList();
+    dirEdit = new QComboBox(this);
     dirEdit->setEditable(true);
     dirEdit->setObjectName(QStringLiteral("DirEdit"));
     dirEdit->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Minimum);
@@ -21,13 +22,14 @@ DirSelectWidget::DirSelectWidget(QWidget *parent) : QWidget(parent), dirChanged(
 
     QLabel *spaceTip=new QLabel(this);
     spaceTip->setObjectName(QStringLiteral("SpaceTip"));
-    QHBoxLayout *dirHLayout=new QHBoxLayout();
+
+    QHBoxLayout *dirHLayout = new QHBoxLayout();
     dirHLayout->addStretch(1);
     dirHLayout->addWidget(spaceTip);
     dirHLayout->addSpacing(20*logicalDpiX()/96);
     spaceTip->setFont(QFont("Microsoft Yahei",8));
     dirEdit->setLayout(dirHLayout);
-    freeSpace=getAvailableBytes(getDir());
+    freeSpace = getAvailableBytes(getDir());
     spaceTip->setText(formatSize(false,freeSpace));
 
     QObject::connect(dirEdit,&QComboBox::editTextChanged,[this,spaceTip](const QString &dir){
@@ -36,7 +38,7 @@ DirSelectWidget::DirSelectWidget(QWidget *parent) : QWidget(parent), dirChanged(
 		dirChanged = true;
     });
 
-    QPushButton *selectDir=new QPushButton(this);
+    QPushButton *selectDir = new QPushButton(this);
     selectDir->setObjectName(QStringLiteral("SelectDirButton"));
     GlobalObjects::iconfont.setPointSize(16);
     selectDir->setFont(GlobalObjects::iconfont);
@@ -52,7 +54,7 @@ DirSelectWidget::DirSelectWidget(QWidget *parent) : QWidget(parent), dirChanged(
         }
     });
 
-    QHBoxLayout *dirGroupHLayout=new QHBoxLayout(this);
+    QHBoxLayout *dirGroupHLayout = new QHBoxLayout(this);
     dirGroupHLayout->setContentsMargins(0,0,0,0);
     dirGroupHLayout->setSpacing(0);
     dirGroupHLayout->addWidget(dirEdit);
@@ -102,7 +104,7 @@ bool DirSelectWidget::isValid()
 qint64 DirSelectWidget::getAvailableBytes(const QString &dir)
 {
     QStorageInfo storage(dir);
-    qint64 availableBytes=storage.bytesAvailable();
+    qint64 availableBytes = storage.bytesAvailable();
     if(availableBytes<0)availableBytes=0;
     return availableBytes;
 }

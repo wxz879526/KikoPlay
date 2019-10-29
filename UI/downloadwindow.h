@@ -17,9 +17,10 @@ class DownloadWindow : public QWidget
 public:
     explicit DownloadWindow(QWidget *parent = nullptr);
     ~DownloadWindow();
+
 private:
-    const int refreshInterval=1000;
-    const int backgoundRefreshInterval=10000;
+    const int refreshInterval = 1000;
+    const int backgoundRefreshInterval = 10000;
 
     QTreeView *downloadView;
     QPlainTextEdit *logView;

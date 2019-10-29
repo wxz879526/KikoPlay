@@ -1,9 +1,11 @@
-#ifndef ADDURITASK_H
+﻿#ifndef ADDURITASK_H
 #define ADDURITASK_H
 
 #include "framelessdialog.h"
+
 class DirSelectWidget;
 class QPlainTextEdit;
+
 class AddUriTask : public CFramelessDialog
 {
     Q_OBJECT
@@ -16,6 +18,7 @@ public:
 private:
     DirSelectWidget *dirSelect;
     QPlainTextEdit *uriEdit;
+
 protected:
     virtual void onAccept();
 };
