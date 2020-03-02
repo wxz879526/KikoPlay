@@ -3,6 +3,8 @@
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLPaintDevice>
 #include <QCoreApplication>
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QDebug>
 #include <QMap>
 #include <clocale>
@@ -59,13 +61,37 @@ const char *fShaderDanmu_Old =
         "    gl_FragColor.rgba = texture2D(u_SamplerD, v_vTexCoord).bgra;\n"
         "    gl_FragColor.a *= alpha;\n"
 "}\n";
+#ifdef Q_OS_WIN
+#pragma comment (lib,"user32.lib")
+#pragma comment (lib,"gdi32.lib")
+static QString get_color_profile(HWND hwnd)
+{
+    HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
+    MONITORINFOEXW mi;
+    mi.cbSize = sizeof mi;
+    GetMonitorInfo(monitor, (MONITORINFO*)&mi);
+    QString name;
+
+    HDC ic = CreateICW(mi.szDevice, nullptr, nullptr, nullptr);
+    if(ic)
+    {
+        wchar_t wname[MAX_PATH + 1];
+        DWORD bufSize(MAX_PATH);
+        if (GetICMProfile(ic, &bufSize, wname))
+            name = QString::fromWCharArray(wname);
+    }
+    if (ic)
+        DeleteDC(ic);
+    return name;
+}
+#endif
 }
 
 MPVPlayer::MPVPlayer(QWidget *parent) : QOpenGLWidget(parent),state(PlayState::Stop),
     mute(false),danmuHide(false),oldOpenGLVersion(false),currentDuration(0)
 {
     std::setlocale(LC_NUMERIC, "C");
-    mpv = mpv::qt::Handle::FromRawHandle(mpv_create());
+    mpv = mpv_create();
     if (!mpv)
         throw std::runtime_error("could not create mpv context");
 
@@ -84,8 +110,12 @@ MPVPlayer::MPVPlayer(QWidget *parent) : QOpenGLWidget(parent),state(PlayState::S
         QString opt(option.trimmed());
         if(opt.startsWith('#'))continue;
         int eqPos=opt.indexOf('=');
-		mpv::qt::set_option_variant(mpv, opt.left(eqPos), opt.mid(eqPos+1));
+        if(eqPos==-1) eqPos = opt.length();
+        QString key(opt.left(eqPos)), val(opt.mid(eqPos+1));
+        mpv::qt::set_option_variant(mpv, key, val);
+        optionsMap.insert(key, val);
     }
+
     mpv_set_option_string(mpv, "terminal", "yes");
     mpv_set_option_string(mpv, "keep-open", "yes");  
     // Make use of the MPV_SUB_API_OPENGL_CB API.
@@ -97,9 +127,6 @@ MPVPlayer::MPVPlayer(QWidget *parent) : QOpenGLWidget(parent),state(PlayState::S
     mpv::qt::set_option_variant(mpv,"no-resume-playback","");
     */
 
-    mpv_gl = (mpv_opengl_cb_context *)mpv_get_sub_api(mpv, MPV_SUB_API_OPENGL_CB);
-    if (!mpv_gl) throw std::runtime_error("OpenGL not compiled in");
-    mpv_opengl_cb_set_update_callback(mpv_gl, MPVPlayer::on_update, (void *)this);
     QObject::connect(this, &MPVPlayer::frameSwapped, this,&MPVPlayer::swapped);
 
     mpv_observe_property(mpv, 0, "duration", MPV_FORMAT_DOUBLE);
@@ -117,11 +144,8 @@ MPVPlayer::MPVPlayer(QWidget *parent) : QOpenGLWidget(parent),state(PlayState::S
 MPVPlayer::~MPVPlayer()
 {
     makeCurrent();
-    if (mpv_gl) mpv_opengl_cb_set_update_callback(mpv_gl, nullptr, nullptr);
-    // Until this call is done, we need to make sure the player remains
-    // alive. This is done implicitly with the mpv::qt::Handle instance
-    // in this class.
-    mpv_opengl_cb_uninit_gl(mpv_gl);
+    if (mpv_gl) mpv_render_context_free(mpv_gl);
+    mpv_terminate_destroy(mpv);
 }
 
 MPVPlayer::VideoSizeInfo MPVPlayer::getVideoSizeInfo()
@@ -187,6 +211,24 @@ QMap<QString, QMap<QString, QString> > MPVPlayer::getMediaInfo()
     mediaInfo.insert(tr("Meta Data"),metaInfo);
 
     return mediaInfo;
+}
+
+void MPVPlayer::setOptions()
+{
+    if(optionsMap.contains("icc-profile-auto"))
+    {
+#ifdef Q_OS_WIN
+        if(this->parent())
+        {
+            QWidget *pWidget = dynamic_cast<QWidget *>(this->parent());
+            if(pWidget)
+            {
+                QString iccProfile(get_color_profile((HWND)pWidget->winId()));
+                mpv::qt::set_option_variant(mpv, "icc-profile",iccProfile);
+            }
+        }
+#endif
+    }
 }
 
 void MPVPlayer::drawTexture(QList<const DanmuObject *> &objList, float alpha)
@@ -400,9 +442,20 @@ void MPVPlayer::screenshot(QString filename)
 
 void MPVPlayer::initializeGL()
 {
-    int r = mpv_opengl_cb_init_gl(mpv_gl, nullptr, MPVPlayer::get_proc_address, nullptr);
-    if (r < 0)
-        throw std::runtime_error("could not initialize OpenGL");
+    mpv_opengl_init_params gl_init_params{get_proc_address, nullptr, nullptr};
+    mpv_render_param params[]{
+        {MPV_RENDER_PARAM_API_TYPE, const_cast<char *>(MPV_RENDER_API_TYPE_OPENGL)},
+        {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params},
+        {MPV_RENDER_PARAM_INVALID, nullptr}
+    };
+
+    if (mpv_render_context_create(&mpv_gl, mpv, params) < 0)
+        throw std::runtime_error("failed to initialize mpv GL context");
+    mpv_render_context_set_update_callback(mpv_gl, MPVPlayer::on_update, reinterpret_cast<void *>(this));
+
+    //int r = mpv_opengl_cb_init_gl(mpv_gl, nullptr, MPVPlayer::get_proc_address, nullptr);
+    //if (r < 0)
+    //    throw std::runtime_error("could not initialize OpenGL");
 
     QOpenGLFunctions *glFuns=context()->functions();
     const char *version = reinterpret_cast<const char*>(glFuns->glGetString(GL_VERSION));
@@ -435,7 +488,17 @@ void MPVPlayer::initializeGL()
 
 void MPVPlayer::paintGL()
 {
-    mpv_opengl_cb_draw(mpv_gl, defaultFramebufferObject(), width(), -height());
+    mpv_opengl_fbo mpfbo{static_cast<int>(defaultFramebufferObject()), width(), height(), 0};
+    int flip_y{1};
+
+    mpv_render_param params[] = {
+        {MPV_RENDER_PARAM_OPENGL_FBO, &mpfbo},
+        {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
+        {MPV_RENDER_PARAM_INVALID, nullptr}
+    };
+    // See render_gl.h on what OpenGL environment mpv expects, and
+    // other API details.
+    mpv_render_context_render(mpv_gl, params);
     if(!danmuHide)
     {
         QOpenGLFramebufferObject::bindDefault();
@@ -449,7 +512,6 @@ void MPVPlayer::paintGL()
 
 void MPVPlayer::swapped()
 {
-    mpv_opengl_cb_report_flip(mpv_gl, 0);
     if(state==PlayState::Play)
     {
         float step(0.f);

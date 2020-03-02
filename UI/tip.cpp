@@ -1,6 +1,7 @@
 ﻿#include "tip.h"
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QFile>
 
 Tip::Tip(QWidget *parent) : CFramelessDialog (tr("Tip"),parent)
 {
