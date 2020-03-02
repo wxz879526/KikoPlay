@@ -5,7 +5,7 @@
 #include <QtCore>
 #include <QtGui>
 #include <mpv/client.h>
-#include <mpv/opengl_cb.h>
+#include <mpv/render_gl.h>
 #include <mpv/qthelper.hpp>
 #include "Play/Danmu/common.h"
 
@@ -50,6 +50,7 @@ public:
 
     VideoSizeInfo getVideoSizeInfo();
     QMap<QString,QMap<QString,QString> > getMediaInfo();
+    void setOptions();
     void drawTexture(QList<const DanmuObject *> &objList, float alpha);
 
 signals:
@@ -93,8 +94,8 @@ private:
       QStringList desc_str;
       QList<int> ids;
     };
-    mpv::qt::Handle mpv;
-    mpv_opengl_cb_context *mpv_gl;
+    mpv_handle *mpv;
+    mpv_render_context *mpv_gl;
     void handle_mpv_event(mpv_event *event);
     static void on_update(void *ctx);
     static void wakeup(void *ctx);
@@ -110,6 +111,7 @@ private:
     QOpenGLShaderProgram danmuShader;
     QTimer refreshTimer;
     QElapsedTimer elapsedTimer;
+    QMap<QString, QString> optionsMap;
 
     int currentDuration;
     TrackInfo audioTrack,subtitleTrack;
