@@ -1,7 +1,7 @@
 #ifndef CLICKSLIDER_H
 #define CLICKSLIDER_H
 #include <QSlider>
-#include "../Danmu/eventanalyzer.h"
+#include "Play/Danmu/eventanalyzer.h"
 class ClickSlider: public QSlider
 {
     Q_OBJECT
