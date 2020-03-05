@@ -350,6 +350,9 @@ if(APPLE)
 	add_definitions(-DCHECKNEWVERSION)
 endif(APPLE)
 
+# 添加第三方库依赖语句必须在add_executable前
+link_directories(${CMAKE_SOURCE_DIR}/lib/x64)
+
 add_executable(${PROJECT_NAME}
 		${PROJ_HDR}
 		${PROJ_SRC}
@@ -357,7 +360,6 @@ add_executable(${PROJECT_NAME}
 		${PROJ_MOC}
 		${PROJ_RESOURCES_RCC}
 	)
-
 
 # Warnings
 if (ALL_WARNINGS AND CMAKE_COMPILER_IS_GNUCC)
@@ -370,10 +372,24 @@ endif()
 
 set(QT_LIBS Qt5::Gui Qt5::Test Qt5::Widgets Qt5::Network Qt5::Concurrent Qt5::Xml Qt5::Sql)
 
+set(PROJ_DEP_LIBS libmpv lua53 qhttpengine zlibstat)
+
 target_link_libraries(${PROJECT_NAME}
     ${QT_LIBS}
+	${PROJ_DEP_LIBS}
     ${WIN32_STATIC_LINK}
     ${ADDITIONAL_LIBS})
+	
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Core> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Gui> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Widgets> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Network> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Concurrent> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Sql> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/lib/runtime/mpv-1.dll $<TARGET_FILE_DIR:${PROJECT_NAME}>
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/lib/runtime/qhttpengine.dll $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
 
 if(NOT WIN32)
 	install(TARGETS ${PROJECT_NAME}
