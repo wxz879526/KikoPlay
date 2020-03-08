@@ -37,6 +37,8 @@ if (POLICY CMP0071)
     cmake_policy(SET CMP0071 OLD)
 endif()
 
+#message(WARNING $ENV{QTDIR64})
+
 if(WIN32)
 	if (QTDIR OR DEFINED ENV{QTDIR} OR DEFINED ENV{QTDIR32} OR DEFINED ENV{QTDIR64})
 		# Qt path set by user or env var
@@ -45,6 +47,8 @@ if(WIN32)
 		message(WARNING "QTDIR variable is missing.  Please set this variable to specify path to Qt (e.g. C:/Qt/5.7/msvc2015_64)")
 	endif()
 endif()
+
+#message(WARNING $ENV{QTDIR})
 
 if(WIN32)
 	add_definitions(-DUNICODE -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS)
@@ -76,14 +80,19 @@ else()
 	set(_lib_suffix 32)
 endif()
 
+#message(WARNING $ENV{QTDIR${_lib_suffix}})
 if(DEFINED QTDIR${_lib_suffix})
 	list(APPEND CMAKE_PREFIX_PATH "${QTDIR${_lib_suffix}}")
+	#message(WARNING "111111")
 elseif(DEFINED QTDIR)
 	list(APPEND CMAKE_PREFIX_PATH "${QTDIR}")
+	#message(WARNING "2222")
 elseif(DEFINED ENV{QTDIR${_lib_suffix}})
 	list(APPEND CMAKE_PREFIX_PATH "$ENV{QTDIR${_lib_suffix}}")
+	#message(WARNING "33333")
 elseif(DEFINED ENV{QTDIR})
 	list(APPEND CMAKE_PREFIX_PATH "$ENV{QTDIR}")
+	#message(STATUS "appxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 endif()
 
 find_package(Qt5 REQUIRED COMPONENTS Concurrent Gui LinguistTools Network Sql Test Widgets Xml)
@@ -302,6 +311,10 @@ include_directories(${LANSERVER_DIR})
 set(LUA_DIR Download/Script/lua)
 include_directories(${LUA_DIR})
 
+set(HTTPENGINE_DIR lib/qhttpengine)
+add_subdirectory(${HTTPENGINE_DIR})
+include_directories(${QCUSTOMPLOT_DIR}/src/include)
+
 set(PROJ_FORMS
 	src/AboutDialog.ui
 )
@@ -360,6 +373,8 @@ add_executable(${PROJECT_NAME}
 		${PROJ_MOC}
 		${PROJ_RESOURCES_RCC}
 	)
+	
+add_dependencies(${PROJECT_NAME} qhttpengine)
 
 # Warnings
 if (ALL_WARNINGS AND CMAKE_COMPILER_IS_GNUCC)
@@ -372,7 +387,7 @@ endif()
 
 set(QT_LIBS Qt5::Gui Qt5::Test Qt5::Widgets Qt5::Network Qt5::Concurrent Qt5::Xml Qt5::Sql)
 
-set(PROJ_DEP_LIBS libmpv lua53 qhttpengine zlibstat)
+set(PROJ_DEP_LIBS libmpv lua53 zlibstat qhttpengine)
 
 target_link_libraries(${PROJECT_NAME}
     ${QT_LIBS}
@@ -381,15 +396,22 @@ target_link_libraries(${PROJECT_NAME}
     ${ADDITIONAL_LIBS})
 	
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Core> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Gui> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Widgets> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Network> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Concurrent> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Sql> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    #COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Core> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    #COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Gui> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    #COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Widgets> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+	#COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Network> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+	#COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Concurrent> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qhttpengine> $<TARGET_FILE_DIR:${PROJECT_NAME}>
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/lib/runtime/mpv-1.dll $<TARGET_FILE_DIR:${PROJECT_NAME}>
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/lib/runtime/qhttpengine.dll $<TARGET_FILE_DIR:${PROJECT_NAME}>
     )
+	
+if (WIN32)
+    get_target_property(QT5_QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
+    get_filename_component(QT5_WINDEPLOYQT_EXECUTABLE ${QT5_QMAKE_EXECUTABLE} PATH)
+    set(QT5_WINDEPLOYQT_EXECUTABLE "${QT5_WINDEPLOYQT_EXECUTABLE}/windeployqt.exe")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+       COMMAND ${QT5_WINDEPLOYQT_EXECUTABLE} --qmldir ${CMAKE_SOURCE_DIR} $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+endif(WIN32)
 
 if(NOT WIN32)
 	install(TARGETS ${PROJECT_NAME}
