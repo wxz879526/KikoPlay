@@ -403,6 +403,7 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	#COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Concurrent> $<TARGET_FILE_DIR:${PROJECT_NAME}>
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qhttpengine> $<TARGET_FILE_DIR:${PROJECT_NAME}>
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/lib/runtime/mpv-1.dll $<TARGET_FILE_DIR:${PROJECT_NAME}>
+	COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_SOURCE_DIR}/lib/runtime/web/ $<TARGET_FILE_DIR:${PROJECT_NAME}>/web/
     )
 	
 if (WIN32)

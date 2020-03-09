@@ -144,6 +144,7 @@ void MainWindow::setupUI()
 #else
     #define pageBtnObjName "PageButton_O"
 #endif
+	// 播放
     buttonPage_Play = new QToolButton(widgetTitlebar);
     buttonPage_Play->setFont(normalFont);
     buttonPage_Play->setText(tr("Player"));
@@ -153,6 +154,7 @@ void MainWindow::setupUI()
     buttonPage_Play->setFixedSize(pageButtonSize);
     buttonPage_Play->setChecked(true);
 
+	// 资料
     buttonPage_Library = new QToolButton(widgetTitlebar);
     buttonPage_Library->setFont(normalFont);
     buttonPage_Library->setText(tr("Library"));
@@ -161,6 +163,7 @@ void MainWindow::setupUI()
     buttonPage_Library->setToolButtonStyle(Qt::ToolButtonTextOnly);
     buttonPage_Library->setFixedSize(pageButtonSize);
 
+	// 下载
     buttonPage_Downlaod = new QToolButton(widgetTitlebar);
     buttonPage_Downlaod->setFont(normalFont);
     buttonPage_Downlaod->setText(tr("Download"));
@@ -234,7 +237,7 @@ void MainWindow::setupUI()
     layout->addWidget(buttonIcon);
     layout->addSpacing(20*logicalDpiY()/96);
     layout->addLayout(pageVerticalLayout);
-    layout->addStretch(1);
+    layout->addStretch(1); //下载按钮和最新化按钮直接的空白区域
     layout->addWidget(minButton);
     layout->addWidget(maxButton);
     layout->addWidget(closeButton);
