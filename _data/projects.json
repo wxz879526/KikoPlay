@@ -12,15 +12,15 @@
 		"image": "library.jpg"
 	},
 	{
+		"name": "Anime",
+		"image": "anime.jpg"
+	},
+	{
 		"name": "Download",
 		"image": "download.jpg"
 	},
 	{
 		"name": "Bangumi",
 		"image": "bangumi.jpg"
-	},
-	{
-		"name": "Resource",
-		"image": "res.jpg"
 	}
 ]

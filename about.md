@@ -3,11 +3,11 @@ layout: page
 title: 关于
 permalink: /about/
 ---
-## KikoPlay - A Full-Featured Danmu Player
+## KikoPlay - NOT ONLY A Full-Featured Danmu Player
 
 ## 特性
  - OpenGL渲染，流畅的弹幕体验
- - libmpv播放内核，支持多种媒体文件格式，支持mpv灵活的参数设置
+ - libmpv播放内核，支持多种媒体文件格式，保留mpv灵活的参数设置，支持实时进度条预览
  - 树形播放列表，随意组织你的番剧
  - 支持所有主流视频网站弹幕搜索下载：AcFun,Bilibili,Tucao,5dm,巴哈姆特,爱奇艺,优酷,腾讯视频,PPTV
  - 灵活的弹幕屏蔽规则设定，支持自动合并相似弹幕，提升观看体验
